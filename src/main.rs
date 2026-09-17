@@ -1,3 +1,4 @@
+use avian2d::PhysicsPlugins;
 use bevy::prelude::*;
 
 mod app_state;
@@ -21,12 +22,10 @@ fn main() {
             ..default()
         }))
         .init_state::<GameState>()
+        .add_plugins(PhysicsPlugins::default())
         .add_plugins(player_plugin)
         .add_plugins(world_setup::world_plugin)
-        .add_systems(
-            Startup,
-            (loading_screen).run_if(in_state(GameState::Loading)),
-        )
+        .add_systems(OnEnter(GameState::Loading), loading_screen)
         .add_systems(
             Update,
             (loading_assets).run_if(in_state(GameState::Loading)),
