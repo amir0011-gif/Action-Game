@@ -38,6 +38,7 @@ pub fn player_setup(
             hide_time: Timer::from_seconds(3.0, TimerMode::Once),
             velocity: 250.0,
         },
+        Position::from_xy(0.0, 0.0),
         RigidBody::Dynamic,
         Collider::rectangle(25.0, 25.0),
         Transform::from_xyz(0.0, 0.0, 1.0),
