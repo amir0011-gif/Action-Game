@@ -9,7 +9,9 @@ use app_state::*;
 
 // use ui::main_menu::menu_plugin;
 
-use crate::entities::{player::player::player_plugin, world::world_setup};
+use crate::entities::{
+    enemies::guard::enemies_plugin, player::player::player_plugin, world::world_setup,
+};
 
 fn main() {
     App::new()
@@ -25,6 +27,7 @@ fn main() {
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(player_plugin)
         .add_plugins(world_setup::world_plugin)
+        .add_plugins(enemies_plugin)
         .add_systems(OnEnter(GameState::Loading), loading_screen)
         .add_systems(
             Update,

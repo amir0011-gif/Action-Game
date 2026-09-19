@@ -1,8 +1,5 @@
-use avian2d::{
-    collision::collider::Collider,
-    dynamics::rigid_body::{LinearVelocity, LockedAxes, RigidBody},
-};
-use bevy::prelude::*;
+use avian2d::prelude::*;
+use bevy::{math::VectorSpace, prelude::*};
 
 #[derive(Component)]
 pub struct Player;
@@ -34,11 +31,12 @@ pub fn player_setup(
 
     commands.spawn((
         Player,
+        GravityScale(0.0),
         PlayerState {
             health: 100,
             stamina: 60,
             hide_time: Timer::from_seconds(3.0, TimerMode::Once),
-            velocity: 5000.0,
+            velocity: 250.0,
         },
         RigidBody::Dynamic,
         Collider::rectangle(25.0, 25.0),
@@ -52,23 +50,39 @@ pub fn player_setup(
 
 fn player_movment(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    time: Res<Time>,
     mut query: Query<(&mut LinearVelocity, &PlayerState), With<Player>>,
 ) {
     for (mut velocity, state) in &mut query.iter_mut() {
+        let mut direction = Vec2::ZERO;
+
+        // move right or left
         if keyboard_input.pressed(KeyCode::ArrowRight) {
-            velocity.x = state.velocity * time.delta_secs();
+            direction.x = 1.0;
         } else if keyboard_input.pressed(KeyCode::ArrowLeft) {
-            velocity.x = -state.velocity * time.delta_secs();
-        } else {
-            velocity.x = 0.0; // توقف در صورت رها کردن کلید
+            direction.x = -1.0;
         }
 
-        if velocity.y.abs() < 0.1
-            && !keyboard_input.pressed(KeyCode::ArrowDown)
-            && keyboard_input.just_pressed(KeyCode::ArrowUp)
-        {
-            velocity.y = state.velocity * time.delta_secs();
+        // move up or down
+        if keyboard_input.pressed(KeyCode::ArrowUp) {
+            direction.y = 1.0;
+        } else if keyboard_input.pressed(KeyCode::ArrowDown) {
+            direction.y = -1.0;
         }
+
+        //normalize vector to set speed
+        if direction.length_squared() > 0.0 {
+            direction = direction.normalize();
+        }
+
+        velocity.x = direction.x * state.velocity;
+        velocity.y = direction.y * state.velocity;
+
+        //logic of jump if gravity is sets
+        // if velocity.y.abs() < 0.1
+        //     && !keyboard_input.pressed(KeyCode::ArrowDown)
+        //     && keyboard_input.just_pressed(KeyCode::ArrowUp)
+        // {
+        //     velocity.y = state.velocity * time.delta_secs();
+        // }
     }
 }
