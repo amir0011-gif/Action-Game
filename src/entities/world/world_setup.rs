@@ -13,8 +13,10 @@ pub fn world_plugin(app: &mut App) {
 #[derive(Component)]
 struct MainCamera;
 
+///base setup object world
 fn world_setup(mut commands: Commands) {
     commands.spawn((Camera2d::default(), MainCamera));
+
     commands.spawn((Sprite::from_color(
         Color::srgb(0.1, 0.2, 0.3),
         Vec2 {
@@ -22,14 +24,37 @@ fn world_setup(mut commands: Commands) {
             y: 800.0,
         },
     ),));
+
     commands.spawn((
         Sprite::from_color(Color::srgb(0.6, 0.2, 0.6), Vec2 { x: 600.0, y: 10.0 }),
         Transform::from_xyz(0.0, -300.0, 1.0),
         RigidBody::Static,
         Collider::rectangle(600.0, 10.0),
     ));
+
+    commands.spawn((
+        Sprite::from_color(Color::srgb(0.6, 0.2, 0.6), Vec2 { x: 200.0, y: 10.0 }),
+        Transform::from_xyz(-200.0, 0.0, 1.0),
+        RigidBody::Static,
+        Collider::rectangle(200.0, 10.0),
+    ));
+
+    commands.spawn((
+        Sprite::from_color(Color::srgb(0.6, 0.2, 0.6), Vec2 { x: 10.0, y: 200.0 }),
+        Transform::from_xyz(300.0, 50.0, 1.0),
+        RigidBody::Static,
+        Collider::rectangle(10.0, 200.0),
+    ));
+
+    commands.spawn((
+        Sprite::from_color(Color::srgb(0.6, 0.2, 0.6), Vec2 { x: 200.0, y: 10.0 }),
+        Transform::from_xyz(200.0, 0.0, 1.0),
+        RigidBody::Static,
+        Collider::rectangle(200.0, 10.0),
+    ));
 }
 
+///player camera
 fn camera_follow_player(
     player_query: Query<&Position, With<Player>>,
 

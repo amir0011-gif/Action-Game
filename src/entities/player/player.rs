@@ -10,6 +10,8 @@ pub struct PlayerState {
     pub stamina: u32,
     pub velocity: f32,
     pub hide_time: Timer,
+    pub dodge_coldown_time: Timer,
+    pub dodge_timer: Timer,
 }
 
 pub fn player_plugin(app: &mut App) {
@@ -36,6 +38,9 @@ pub fn player_setup(
             health: 100,
             stamina: 60,
             hide_time: Timer::from_seconds(3.0, TimerMode::Once),
+            dodge_coldown_time: Timer::from_seconds(1.0, TimerMode::Once),
+            dodge_timer: Timer::from_seconds(0.2, TimerMode::Once),
+
             velocity: 250.0,
         },
         Position::from_xy(0.0, 0.0),
@@ -51,10 +56,14 @@ pub fn player_setup(
 
 fn player_movment(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut LinearVelocity, &PlayerState), With<Player>>,
+    mut query: Query<(&mut LinearVelocity, &mut PlayerState), With<Player>>,
+    time: Res<Time>,
 ) {
-    for (mut velocity, state) in &mut query.iter_mut() {
+    for (mut velocity, mut state) in &mut query.iter_mut() {
         let mut direction = Vec2::ZERO;
+
+        state.dodge_coldown_time.tick(time.delta());
+        state.dodge_timer.tick(time.delta());
 
         // move right or left
         if keyboard_input.pressed(KeyCode::ArrowRight) {
@@ -75,8 +84,21 @@ fn player_movment(
             direction = direction.normalize();
         }
 
-        velocity.x = direction.x * state.velocity;
-        velocity.y = direction.y * state.velocity;
+        let mut fast_speed = 1.0;
+
+        if keyboard_input.just_pressed(KeyCode::Space) {
+            if state.dodge_coldown_time.is_finished() {
+                state.dodge_coldown_time.reset();
+                state.dodge_timer.reset();
+            }
+        }
+
+        if !state.dodge_timer.is_finished() {
+            fast_speed = 4.0;
+        }
+
+        velocity.x = direction.x * state.velocity * fast_speed;
+        velocity.y = direction.y * state.velocity * fast_speed;
 
         //logic of jump if gravity is sets
         // if velocity.y.abs() < 0.1
